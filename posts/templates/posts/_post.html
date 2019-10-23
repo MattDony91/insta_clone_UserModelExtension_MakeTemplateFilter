@@ -1,0 +1,10 @@
+{% load make_link %}
+<div class="card col-6 mx-auto">
+  <img src="{{post.image.url}}" class="card-img-top" alt="...">
+  <div class="card-body">
+    <h5 class="card-title">Card title</h5>
+    <p class="card-text">{{post | hashtag_link | safe}}</p>
+    <p class="card-text">추천수: {{post.like_users.all | length}}</p>
+    <a href="{% url 'posts:like' post.id %}" class="btn btn-primary">좋아요</a>
+  </div>
+</div>
