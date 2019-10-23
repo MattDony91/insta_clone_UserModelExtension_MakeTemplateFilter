@@ -42,3 +42,14 @@ def user_page(request, id):
         'user_info': user_info,
     }
     return render(request, 'accounts/user_page.html', context)
+
+def follow(request, id):
+    you = get_object_or_404(User, id=id)
+    me = request.user
+
+    if you != me:
+        if me.followings.filter(id=id):
+            me.followings.remove(you)
+        else:
+            me.followings.add(you)
+    return redirect('accounts:user_page', id)
