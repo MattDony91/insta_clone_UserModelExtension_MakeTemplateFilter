@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import PostForm
 from .models import Post, HashTag
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 def index(request):
-    posts = Post.objects.all()
+    posts = Post.objects.all().order_by('-id')
+    paginator = Paginator(posts, 3)
+    page = request.GET.get('page')
+    posts = paginator.get_page(page)
     context = {
         'posts': posts,
     }
@@ -50,4 +55,30 @@ def like(request, id):
         post.like_users.remove(user)
     else:
         post.like_users.add(user)
+    return redirect('posts:index')
+
+
+def update(request, id):
+    post = get_object_or_404(Post, id=id)
+    if request.method == 'POST':
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            post = form.save()
+            post.hashtags.clear()
+            for word in post.content.split():
+                if word.startswith('#') and len(word) >= 2:
+                    # hashtag, created = HashTag.objects.get_or_create(content=word) # return type tuple: (object, True or False)
+                    hashtag = HashTag.objects.get_or_create(content=word)[0]
+                    post.hashtags.add(hashtag)
+            return redirect('posts:index')
+    else:
+        form = PostForm(instance=post)
+    context = {
+        'form': form,
+    }
+    return render(request, 'accounts/form.html', context)
+
+@require_POST
+def delete(request, id):
+    get_object_or_404(Post, id=id).delete()
     return redirect('posts:index')

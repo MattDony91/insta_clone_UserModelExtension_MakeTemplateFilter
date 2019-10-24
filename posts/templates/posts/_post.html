@@ -5,6 +5,15 @@
     <h5 class="card-title">Card title</h5>
     <p class="card-text">{{post | hashtag_link | safe}}</p>
     <p class="card-text">추천수: {{post.like_users.all | length}}</p>
+    {% if post.user.id == user.id %}
+      <div>
+        <a href="{% url 'posts:update' post.id %}" class="btn btn-warning">수정</a>
+        <form action="{% url 'posts:delete' post.id %}" method="POST">
+          {% csrf_token %}
+          <input class="btn btn-danger" type="submit" value="삭제">
+        </form>
+      </div>
+      {% endif %}
     <a href="{% url 'posts:like' post.id %}" class="btn btn-primary">좋아요</a>
   </div>
 </div>
